@@ -8,20 +8,20 @@ class Cpt
 {
     public function __construct($pluginFile)
     {
-        $this->pluginFile = $pluginFile; 
+
+        add_filter('single_template', [$this, 'kitaevents_post_type_template']);
+        $this->pluginFile = $pluginFile;
         add_action('init', [$this, 'kitaevents']);
         add_action('cmb2_admin_init', [$this, 'cmb2_sample_metaboxes']);
 
-
-        add_filter('page_template', [$this, 'my_custom_template']);
-        Helper::debug(get_post_types());
+        Helper::debug(dirname(__FILE__) . '/templates/kitaevents-single-template.php');
     }
 
     public function kitaevents()
     {
         // Set UI labels for Custom Post Type
         $labels = array(
-            'name'                => _x('KiTa Events', 'Post Type General Name', 'ˇ'),
+            'name'                => _x('KiTa Events', 'Post Type General Name', 'flohkiste'),
             'singular_name'       => _x('KiTa Event', 'Post Type Singular Name', 'flohkiste'),
             'menu_name'           => __('KiTa Events', 'flohkiste'),
             'parent_item_colon'   => __('Parent KiTa Event', 'flohkiste'),
@@ -39,24 +39,25 @@ class Cpt
         // Set other options for Custom Post Type
 
         $args = array(
-            'label'               => __('kita-events', 'flohkiste'),
+            'label'               => __('kitaevents', 'flohkiste'),
             'description'         => __('KiTa Events', 'flohkiste'),
             'labels'              => $labels,
+            
             'supports'            => array('title', 'revisions'),
-            'hierarchical'        => false,
             'public'              => true,
             'show_ui'             => true,
             'show_in_menu'        => true,
-            'show_in_nav_menus'   => false,
+            'show_in_nav_menus'   => true,
             'show_in_admin_bar'   => true,
             'menu_position'       => 5,
             'menu_icon'           => 'dashicons-star-half',
             'can_export'          => true,
             'has_archive'         => true,
+
             'exclude_from_search' => true,
-            'publicly_queryable'  => false,
-            'capability_type'     => 'page',
+            'publicly_queryable'  => true,
             'show_in_rest'        => true,
+            'capability_type'     => 'post',
 
             // This is where we add taxonomies to our CPT
             'taxonomies'          => array('category'),
@@ -154,16 +155,15 @@ class Cpt
         ));
     }
 
-    public function my_custom_template($originalTemplate)
+    public static function kitaevents_post_type_template($single_template)
     {
-
         global $post;
-        $singleTemplate = dirname($this->pluginFile) . '/includes/Templates/single-kitaevents.php';
 
-        if('kitaevents' === get_post_type(get_the_ID())) {
-            return $singleTemplate;
+        if ('kitaevents' === $post->post_type) {
+            $single_template = dirname(__FILE__) . '/templates/kitaevents-single-template.php';
         }
 
-        return $originalTemplate;
-    }
+        return $single_template;
+    } //end mte_get_event_post_type_template function
+
 }
